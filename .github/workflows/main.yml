@@ -44,7 +44,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.VERSION }}
           name: v${{ steps.version.outputs.VERSION }}
           files: |
-            target/HuskSync-Bukkit-*+mc.*.jar
-            target/HuskSync-Fabric-*+mc.*.jar
+            build/libs/*.jar          # ← 改成实际输出路径
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
