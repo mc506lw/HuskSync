@@ -1,0 +1,50 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - 'docs/**'
+      - 'workflows/**'
+      - 'README.md'
+
+permissions:
+  contents: write   # 允许创建 Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 📦
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle 🏗️
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: build
+
+      # 从 gradle.properties 读取版本号
+      - name: Fetch Version Name 📝
+        id: version
+        run: |
+          VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      # 创建 Release 并上传所有 JAR
+      - name: Create Release 🚀
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: v${{ steps.version.outputs.VERSION }}
+          files: |
+            target/HuskSync-Bukkit-*+mc.*.jar
+            target/HuskSync-Fabric-*+mc.*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
