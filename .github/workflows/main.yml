@@ -1,4 +1,4 @@
-name: Build & Release
+name: Release Tests & Publish
 
 on:
   push:
@@ -32,21 +32,36 @@ jobs:
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
           
-      - name: 'Upload Assets to Release 🚀'
+      - name: 'Get next version 🏷️'
+        id: version
+        run: |
+          echo "VERSION=v1.0.$(date +%s)" >> $GITHUB_OUTPUT
+          
+      - name: 'Create Release and Upload Assets 🚀'
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            target/HuskSync-Bukkit-${{ github.event.release.tag_name }}+mc.1.20.1.jar
-            target/HuskSync-Bukkit-${{ github.event.release.tag_name }}+mc.1.21.1.jar
-            target/HuskSync-Bukkit-${{ github.event.release.tag_name }}+mc.1.21.4.jar
-            target/HuskSync-Bukkit-${{ github.event.release.tag_name }}+mc.1.21.5.jar
-            target/HuskSync-Bukkit-${{ github.event.release.tag_name }}+mc.1.21.8.jar
-            target/HuskSync-Fabric-${{ github.event.release.tag_name }}+mc.1.20.1.jar
-            target/HuskSync-Fabric-${{ github.event.release.tag_name }}+mc.1.21.1.jar
-            target/HuskSync-Fabric-${{ github.event.release.tag_name }}+mc.1.21.4.jar
-            target/HuskSync-Fabric-${{ github.event.release.tag_name }}+mc.1.21.5.jar
-            target/HuskSync-Fabric-${{ github.event.release.tag_name }}+mc.1.21.8.jar
-          tag_name: ${{ github.event.release.tag_name }}
-          body: ${{ github.event.release.body }}
+            target/HuskSync-Bukkit-${{ steps.version.outputs.VERSION }}+mc.1.20.1.jar
+            target/HuskSync-Bukkit-${{ steps.version.outputs.VERSION }}+mc.1.21.1.jar
+            target/HuskSync-Bukkit-${{ steps.version.outputs.VERSION }}+mc.1.21.4.jar
+            target/HuskSync-Bukkit-${{ steps.version.outputs.VERSION }}+mc.1.21.5.jar
+            target/HuskSync-Bukkit-${{ steps.version.outputs.VERSION }}+mc.1.21.8.jar
+            target/HuskSync-Fabric-${{ steps.version.outputs.VERSION }}+mc.1.20.1.jar
+            target/HuskSync-Fabric-${{ steps.version.outputs.VERSION }}+mc.1.21.1.jar
+            target/HuskSync-Fabric-${{ steps.version.outputs.VERSION }}+mc.1.21.4.jar
+            target/HuskSync-Fabric-${{ steps.version.outputs.VERSION }}+mc.1.21.5.jar
+            target/HuskSync-Fabric-${{ steps.version.outputs.VERSION }}+mc.1.21.8.jar
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            Automated release
+            
+            ## Changes
+            - Built from commit: ${{ github.sha }}
+            - Build time: $(date -u)
+            
+            ## Supported Minecraft Versions
+            - Paper 1.20.1, 1.21.1, 1.21.4, 1.21.5, 1.21.8
+            - Fabric 1.20.1, 1.21.1, 1.21.4, 1.21.5, 1.21.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
